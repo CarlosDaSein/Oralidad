@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MISIÓN: LENGUAJE ORAL – DESAFÍO GALÁCTICO</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+<style>
+body{font-family:Inter,sans-serif;background:#FFFDF8;color:#2D3748}
+html,body{height:100%}
+body{display:flex;flex-direction:column;overflow:hidden}
+header{flex:none}
+main{flex:1;min-height:0;overflow-y:auto}
+.hidden{display:none!important}
+#sChal:not(.hidden){display:grid;gap:1rem;grid-template-columns:1fr}
+.lcol{display:flex;flex-direction:column;gap:.75rem;min-height:0}
+.main-card{display:flex;flex-direction:column;min-height:0}
+.textbox{min-height:150px;overflow-y:auto;display:flex}
+@media(min-width:1024px){
+ main{overflow:hidden}
+ #sChal:not(.hidden){grid-template-columns:2fr 1fr;height:100%}
+ .main-card{flex:1}.textbox{flex:1;min-height:0}
+ .rcol{height:100%;overflow-y:auto}
+ #sCert{height:100%;overflow-y:auto}
+}
+.go{background:linear-gradient(135deg,#F57C00,#FF9800)}
+.btn{padding:.75rem 1.25rem;border-radius:.75rem;font-weight:700;color:#fff;background:#F57C00}
+.btn:hover{background:#E65100}.btn:disabled{background:#D1D5DB;color:#6B7280;cursor:not-allowed}
+.card{background:#fff;border:1px solid #FFCC80;border-radius:1rem;padding:1rem}
+.inp{width:100%;padding:.75rem 1rem;border:1px solid #D1D5DB;border-radius:.75rem}
+.inp:focus{outline:2px solid #FFCC80;border-color:#F57C00}
+.bar{height:8px;background:#E5E7EB;border-radius:9px}.bar div{height:8px;border-radius:9px;background:#F57C00;transition:width .5s}
+#space{width:100%;aspect-ratio:16/9;background:#000;border-radius:.75rem;display:block;touch-action:none}
+@media print{body *{visibility:hidden}#diploma,#diploma *{visibility:visible}#diploma{position:absolute;left:0;top:0;width:100%}}
+</style>
+</head>
+<body>
+<header class="bg-white border-b border-orange-200">
+ <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+  <div><h1 class="font-black leading-tight">🚀 MISIÓN: LENGUAJE ORAL</h1><p class="text-xs font-semibold text-orange-600">Desafío galáctico de lectura</p></div>
+  <div class="flex items-center gap-3">
+   <span class="bg-yellow-50 border border-yellow-300 px-3 py-1 rounded-full text-xs font-semibold">Superados: <b id="prog" class="text-orange-600">0 / 5</b></span>
+   <button id="btnHome" class="hidden px-3 py-2 border border-orange-300 text-orange-700 rounded-lg text-xs font-bold" onclick="app.askHome()">🏠 Volver al inicio</button>
+   <button id="btnDip" class="btn hidden text-xs" onclick="app.showDiploma()">Ver diploma</button>
+  </div>
+ </div>
+</header>
+
+<main class="w-full max-w-6xl mx-auto px-4 py-3">
+
+<section id="sReg" class="card max-w-md mx-auto mt-6">
+ <h2 class="text-2xl font-black text-center">👨‍🚀 Registro de cadete</h2>
+ <p class="text-sm text-gray-600 text-center mb-4">Escribe tus datos para iniciar el entrenamiento de lectura oral.</p>
+ <form onsubmit="app.register(event)" class="space-y-3">
+  <label class="block text-sm font-bold">Nombre completo<input id="rName" required class="inp mt-1 font-normal" placeholder="Ej. Juan Pérez Gómez"></label>
+  <label class="block text-sm font-bold">Carrera o especialidad<input id="rCareer" required class="inp mt-1 font-normal" placeholder="Escribe tu carrera o especialidad"></label>
+  <label class="block text-sm font-bold">Grupo<input id="rGroup" required class="inp mt-1 font-normal" placeholder="Escribe tu grupo (Ej. 4° B)"></label>
+  <button class="btn w-full">Iniciar desafío</button>
+ </form>
+</section>
+
+<section id="sChal" class="hidden">
+ <div class="lcol">
+  <div class="card main-card">
+   <div class="flex justify-between items-center border-b pb-2 mb-3">
+    <div class="flex gap-2"><span id="bCase" class="bg-orange-500 text-white text-xs font-black px-3 py-1 rounded-full"></span><span id="bType" class="bg-yellow-50 text-orange-600 text-xs font-bold px-3 py-1 rounded-full"></span></div>
+    <span id="clock" class="text-2xl font-black font-mono">00:00</span>
+   </div>
+   <div class="textbox bg-orange-50 border border-orange-200 rounded-xl p-4">
+    <p id="txt" class="m-auto text-base sm:text-lg lg:text-xl font-medium leading-relaxed text-center select-none"></p>
+   </div>
+   <p id="nullMsg" class="hidden mt-3 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-bold">No se detectó lectura en voz alta. Puntaje: 0</p>
+   <div class="flex flex-wrap gap-3 items-center justify-between bg-gray-50 p-3 rounded-xl mt-3">
+    <button id="bMic" class="btn" onclick="app.toggle()">🎤 Iniciar lectura</button>
+    <div class="flex gap-2">
+     <button id="bJ1" class="px-3 py-2 bg-yellow-50 border border-yellow-300 text-orange-600 rounded-lg text-xs font-bold disabled:opacity-40" onclick="app.jokerHalf()">👁️ Comodín estándar</button>
+     <button id="bJ2" class="px-3 py-2 bg-purple-100 border border-purple-300 text-purple-700 rounded-lg text-xs font-bold disabled:opacity-40" onclick="app.jokerPremium()">🚀 Comodín premium</button>
+    </div>
+   </div>
+   <p class="text-xs text-gray-500 mt-2">El texto aparece al iniciar y el cronómetro no se detiene: tardar más baja tu puntaje. Cada comodín se usa una vez por desafío, antes de iniciar.</p>
+   <p id="msg" class="hidden mt-3 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-bold"></p>
+   <label class="block text-xs font-bold text-gray-500 mt-2">Lo que el sistema escucha:</label>
+   <div id="trans" class="h-12 border rounded-lg p-2 text-xs font-mono text-gray-600 overflow-y-auto"></div>
+  </div>
+  <div id="cmp" class="hidden card text-sm grid sm:grid-cols-2 gap-3" style="flex:none">
+   <div class="bg-red-50 p-3 rounded-xl"><b class="text-red-700">Intento anterior</b><div id="cmpA" class="font-mono mt-1"></div></div>
+   <div class="bg-green-50 p-3 rounded-xl"><b class="text-green-700">Intento actual</b><div id="cmpB" class="font-mono mt-1"></div></div>
+  </div>
+ </div>
+ <div class="card rcol">
+  <h3 class="font-bold border-b pb-2 mb-3">Evaluación de lectura</h3>
+  <div class="text-center p-3 bg-orange-50 rounded-xl border border-orange-200 mb-3">
+   <div id="gScore" class="text-4xl font-black text-orange-600">0 / 100</div><div id="gStat" class="text-xs font-bold text-gray-600">Pendiente de lectura</div>
+  </div>
+  <div id="bars" class="space-y-2 text-xs font-bold"></div>
+  <p class="text-[11px] text-gray-500 mt-3">Entonación se estima por la variación de intensidad de tu voz; no mide el tono musical.</p>
+  <button id="bRetry" class="btn w-full mt-3 hidden" onclick="app.retry()">Segunda oportunidad (texto breve)</button>
+  <button id="bNext" class="btn w-full mt-2" disabled onclick="app.next()">Siguiente desafío</button>
+ </div>
+</section>
+
+<section id="sGame" class="hidden max-w-4xl mx-auto bg-slate-900 text-white rounded-2xl p-3">
+ <div class="flex justify-between mb-2"><h2 class="font-black text-yellow-400">Reto de comodín: combate espacial</h2><span id="hp" class="text-red-400 font-bold text-sm"></span></div>
+ <div class="relative mx-auto" style="max-width:calc((100dvh - 250px) * 1.7778)">
+  <canvas id="space" width="800" height="450"></canvas>
+  <div id="ov" class="absolute inset-0 bg-black/80 rounded-xl flex flex-col items-center justify-center text-center p-4">
+   <h3 id="ovT" class="text-2xl font-black text-yellow-400 mb-2"></h3><p id="ovD" class="text-sm text-gray-300 max-w-md mb-4"></p>
+   <button id="ovB" class="btn" onclick="game.start()">¡Iniciar combate!</button>
+  </div>
+ </div>
+ <p class="text-xs text-gray-400 mt-2">Mueve tu X-Wing con las flechas (o A / D). Dispara solo. Destruye los cazas TIE.</p>
+ <div class="grid grid-cols-2 gap-2 mt-3 sm:hidden">
+  <button class="p-4 bg-gray-700 rounded-lg" style="touch-action:none" onpointerdown="game.dir=-1" onpointerup="game.dir=0" onpointerleave="game.dir=0">◀ Izquierda</button>
+  <button class="p-4 bg-gray-700 rounded-lg" style="touch-action:none" onpointerdown="game.dir=1" onpointerup="game.dir=0" onpointerleave="game.dir=0">Derecha ▶</button>
+ </div>
+</section>
+
+<section id="sCert" class="hidden max-w-3xl mx-auto">
+ <div id="locked" class="card text-center">
+  <h3 class="text-2xl font-black">🔒 Diploma bloqueado</h3>
+  <p class="text-sm text-gray-600 my-3">Necesitas superar <b>5 desafíos</b> con puntaje de 60 o más.</p>
+  <p id="lockProg" class="font-bold text-orange-600 mb-4"></p>
+  <button class="btn" onclick="app.show('sChal')">Volver a los desafíos</button>
+ </div>
+ <div id="unlocked" class="hidden">
+  <div class="text-right mb-3"><button class="btn" onclick="window.print()">Imprimir diploma</button></div>
+  <div id="diploma" class="bg-white border-8 border-orange-600 rounded-3xl p-8 text-center space-y-4">
+   <div class="flex justify-between border-b-2 border-orange-200 pb-4 text-left"><div><div class="text-xs font-black text-orange-600">PLATAFORMA EDUCATIVA GALÁCTICA</div><div class="font-black">ACADEMIA DE LENGUAJE ORAL</div></div><div class="text-right text-xs font-mono">FOLIO<div id="folio" class="font-bold text-orange-600"></div></div></div>
+   <p class="text-xs font-bold text-gray-500">OTORGA EL PRESENTE DIPLOMA A:</p>
+   <h1 id="cName" class="text-3xl font-black underline decoration-yellow-400 decoration-4 underline-offset-8"></h1>
+   <p id="cDet" class="text-sm font-semibold text-gray-600"></p>
+   <p class="text-sm max-w-xl mx-auto">Por completar 5 desafíos de lectura oral (fluidez, rapidez, dicción, pronunciación, volumen y entonación) con un promedio de <b id="cAvg"></b> puntos.</p>
+   <div id="cList" class="max-w-xl mx-auto text-left text-xs font-mono bg-orange-50 border border-orange-200 rounded-xl p-3 space-y-1"></div>
+   <p id="cDate" class="text-xs text-gray-500 pt-3 border-t"></p>
+  </div>
+ </div>
+</section>
+</main>
+
+<script>
+/* Pega aquí más textos del mismo nivel: main (estándar), retry (segunda oportunidad) y basic (comodín premium). Sin prefijos, porque el alumno los leería. */
+const BANK = {
+ main: [
+  "La espectrofotometría astronómica permite descomponer la radiación electromagnética procedente de cuerpos celestes remotos, revelando su composición química y su velocidad radial. Los investigadores, quienes interpretan meticulosamente cada línea espectral, deben exponer sus conclusiones con extraordinaria precisión terminológica, articulando cada sílaba para que ningún concepto fundamental resulte ambiguo ante la comunidad científica internacional.",
+  "Aunque la trayectoria parabólica de un vehículo suborbital parezca sencilla, su cálculo exige considerar la resistencia aerodinámica, la rotación terrestre y el empuje variable de los propulsores. El ingeniero responsable comunica estos parámetros pausadamente, pronunciando con nitidez cifras, unidades y advertencias, pues una imprecisión mínima desencadenaría consecuencias catastróficas.",
+  "Los astrofísicos sostienen que la expansión acelerada del universo obedece a una misteriosa energía oscura, cuya naturaleza permanece completamente desconocida. Explicar hipótesis tan abstractas ante un auditorio heterogéneo requiere modular el volumen, administrar la respiración y sostener un ritmo constante, evitando tropiezos en términos como cosmológico, gravitacional o relativista.",
+  "Imperceptiblemente, la magnetosfera terrestre desvía las partículas cargadas que el viento solar proyecta contra nuestro planeta, protegiendo así la delicada biosfera. Cuando una tormenta geomagnética perturba las telecomunicaciones, los operadores transmiten boletines urgentes; su dicción debe ser impecable, rápida y serena, aunque la situación sea verdaderamente apremiante.",
+  "Tres tristes tigres tragaban trigo en un trigal, mientras la tripulación trasbordaba cuidadosamente los instrumentos transoceánicos hacia el transbordador. Esta ejercitación articulatoria, aparentemente caprichosa, perfecciona la coordinación de labios, lengua y paladar, indispensable para pronunciar correctamente secuencias consonánticas complicadas sin vacilar ni atropellar las palabras.",
+  "Durante la reentrada atmosférica, la fricción eleva la temperatura del escudo térmico hasta cifras extraordinarias, y el plasma circundante interrumpe temporalmente las comunicaciones. Transcurridos varios minutos de incertidumbre, el comandante reanuda la transmisión con voz firme, enunciando coordenadas, altitud y velocidad sin titubeos ni pausas innecesarias.",
+  "La arqueoastronomía estudia cómo las civilizaciones mesoamericanas, particularmente los mayas, registraron con asombrosa exactitud los ciclos de Venus y los eclipses. Narrar estos descubrimientos exige una entonación expresiva: ascender ante el misterio, descender ante la conclusión y detenerse brevemente en cada coma para que el oyente asimile conceptos tan sofisticados.",
+  "Un telescopio interferométrico combina simultáneamente las señales de múltiples antenas distribuidas por todo el planeta, logrando una resolución comparable a la de un instrumento gigantesco. Los coordinadores del proyecto, quienes hablan diferentes idiomas, recurren a un vocabulario riguroso y a una pronunciación cuidadosa para sincronizar observaciones extraordinariamente delicadas."
+ ],
+ retry: [
+  "El módulo lunar descendió suavemente mientras el astronauta verificaba meticulosamente cada instrumento de navegación.",
+  "Perseverantemente, los ingenieros reconfiguraron el sistema de comunicaciones antes del lanzamiento programado.",
+  "La constelación de Orión resplandecía majestuosamente sobre el observatorio del desierto de Atacama.",
+  "Fundamentalmente, una articulación precisa distingue al orador competente del que apenas balbucea.",
+  "El espectrómetro identificó hidrógeno, helio y carbono en la atmósfera de aquel exoplaneta lejanísimo."
+ ],
+ basic: [
+  "La estación espacial orbita la Tierra y sus astronautas realizan experimentos científicos todos los días.",
+  "Cuando el cohete despega, los motores producen una enorme fuerza que lo impulsa hacia el espacio.",
+  "El telescopio espacial fotografía galaxias lejanas y nos ayuda a comprender cómo nació el universo.",
+  "Los científicos estudian el planeta Marte porque quieren saber si alguna vez existió agua en su superficie."
+ ]
+};
+const $ = id => document.getElementById(id);
+const PASS = 60, NEED = 5;
+const fmt = s => String(Math.floor(s/60)).padStart(2,'0') + ':' + String(Math.floor(s%60)).padStart(2,'0');
+const norm = w => w.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9ñ]/g,'');
+const words = t => t.split(/\s+/).map(norm).filter(Boolean);
+function lev(a,b){const d=[...Array(b.length+1).keys()];for(let i=1;i<=a.length;i++){let p=d[0];d[0]=i;for(let j=1;j<=b.length;j++){const t=d[j];d[j]=Math.min(d[j]+1,d[j-1]+1,p+(a[i-1]===b[j-1]?0:1));p=t}}return d[b.length]}
+const same = (a,b) => a===b || (a.length>4 && b.length>4 && lev(a,b)<=1);
+function lcs(a,b){const m=a.length,n=b.length,t=Array.from({length:m+1},()=>Array(n+1).fill(0));for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)t[i][j]=same(a[i-1],b[j-1])?t[i-1][j-1]+1:Math.max(t[i-1][j],t[i][j-1]);return t[m][n]}
+const clamp = v => Math.max(0, Math.min(100, Math.round(v)));
+const beep = (f=440,d=.1) => { try{ const c=beep.c||(beep.c=new (window.AudioContext||window.webkitAudioContext)()),o=c.createOscillator(),g=c.createGain(); o.frequency.value=f; g.gain.setValueAtTime(.1,c.currentTime); g.gain.exponentialRampToValueAtTime(.01,c.currentTime+d); o.connect(g); g.connect(c.destination); o.start(); o.stop(c.currentTime+d);}catch(e){} };
+
+const IND = [['fluidez','Fluidez'],['rapidez','Rapidez (palabras por minuto)'],['diccion','Dicción'],['pronunciacion','Pronunciación'],['volumen','Volumen / intensidad'],['entonacion','Entonación / modulación']];
+$('bars').innerHTML = IND.map(([k,n]) => `<div><div class="flex justify-between mb-1"><span>${n}</span><span id="v-${k}">0 pts</span></div><div class="bar"><div id="b-${k}" style="width:0%"></div></div></div>`).join('');
+
+class App {
+ constructor(){
+  this.st = null; this.idx = 0; this.mode = 'main'; this.text = ''; this.done = [];
+  this.j1 = false; this.j2 = false; this.prev = null;
+  this.listening = false; this.final = ''; this.interim = ''; this.t0 = 0; this.tick = null; this.evaluated = false;
+  this.rms = []; this.meter = null; this.stream = null; this.actx = null; this.starting = false;
+  this.initSpeech();
+  try { const s = JSON.parse(localStorage.getItem('galactico')||'null'); if (s && s.st) { this.st = s.st; this.done = s.done||[]; this.idx = s.idx||0; this.enter(); } } catch(e){}
+ }
+ save(){ try{ localStorage.setItem('galactico', JSON.stringify({st:this.st, done:this.done, idx:this.idx})); }catch(e){} }
+ show(id){ ['sReg','sChal','sGame','sCert'].forEach(s => $(s).classList.toggle('hidden', s!==id)); }
+ initSpeech(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { this.noSR = true; return; }
+  const r = this.rec = new SR(); r.continuous = true; r.interimResults = true; r.lang = 'es-MX';
+  r.onresult = e => {
+   let f = '', i = '';
+   for (let k = 0; k < e.results.length; k++) (e.results[k].isFinal ? (f += e.results[k][0].transcript + ' ') : (i += e.results[k][0].transcript));
+   this.final = f; this.interim = i;
+   $('trans').innerText = (f + i).trim() || 'Escuchando...';
+  };
+  r.onerror = e => {
+   const m = {'not-allowed':'El navegador bloqueó el reconocimiento de voz. Abre la página con https o http://localhost (no con doble clic en el archivo) y permite el micrófono.',
+    'service-not-allowed':'El navegador bloqueó el reconocimiento de voz. Abre la página con https o http://localhost y permite el micrófono.',
+    'audio-capture':'No se encontró ningún micrófono disponible.','network':'El reconocimiento de voz necesita conexión a internet.'}[e.error];
+   if (m) { this.msg(m); if (this.listening) this.stop(true); }
+  };
+  r.onend = () => {
+   if (this.listening) { try { r.start(); } catch(e){} return; }
+   if (this.finishing) this.evaluate();   /* se evalúa cuando ya llegó el texto final */
+  };
+ }
+ askHome(){
+  const b = $('btnHome');
+  if (!this.homeArmed) { this.homeArmed = true; b.innerText = '¿Seguro? Se borra tu progreso'; this.homeT = setTimeout(() => { this.homeArmed = false; b.innerText = '🏠 Volver al inicio'; }, 4000); return; }
+  clearTimeout(this.homeT); this.homeArmed = false; b.innerText = '🏠 Volver al inicio'; this.goHome();
+ }
+ goHome(){
+  if (this.listening) this.stop(true);
+  clearInterval(this.tick); game.run = false;
+  this.st = null; this.done = []; this.idx = 0; this.prev = null; this.msg('');
+  try { localStorage.removeItem('galactico'); } catch(e){}
+  $('rName').value = $('rCareer').value = $('rGroup').value = '';
+  $('btnHome').classList.add('hidden'); $('btnDip').classList.add('hidden');
+  this.updateProg(); this.show('sReg');
+ }
+ msg(t,ok){ const m=$('msg'); m.innerText=t||''; m.className='mt-3 p-3 rounded-xl text-sm font-bold border '+(ok?'bg-green-50 border-green-200 text-green-700':'bg-red-50 border-red-200 text-red-700')+(t?'':' hidden'); }
+ register(e){
+  e.preventDefault();
+  this.st = {name:$('rName').value.trim(), career:$('rCareer').value.trim(), group:$('rGroup').value.trim()};
+  this.save(); this.enter();
+ }
+ enter(){ $('btnDip').classList.remove('hidden'); $('btnHome').classList.remove('hidden'); this.show('sChal'); this.load(this.idx); }
+ load(i){
+  this.idx = i; this.mode = 'main'; this.j1 = false; this.j2 = false; this.prev = null;
+  this.text = BANK.main[i % BANK.main.length]; this.save(); this.reset();
+ }
+ reset(){
+  this.listening = false; this.finishing = false; this.evaluated = false;
+  clearInterval(this.tick); $('clock').innerText = '00:00';
+  $('bCase').innerText = 'Caso #' + (this.idx+1);
+  $('bType').innerText = {main:'Texto estándar', retry:'Segunda oportunidad', basic:'Comodín premium (texto básico)'}[this.mode];
+  this.lock('🔒 El texto aparece cuando pulses «Iniciar lectura».');
+  $('trans').innerText = 'Pulsa «Iniciar lectura» y lee en voz alta.';
+  $('nullMsg').classList.add('hidden'); $('bRetry').classList.add('hidden');
+  $('cmp').classList.toggle('hidden', this.mode !== 'retry');
+  $('cmpB').innerText = 'Esperando lectura...';
+  $('bMic').innerText = '🎤 Iniciar lectura'; $('bMic').disabled = false;
+  $('bJ1').disabled = this.j1; $('bJ2').disabled = this.j2;
+  this.paint({fluidez:0,rapidez:0,diccion:0,pronunciacion:0,volumen:0,entonacion:0,global:0,status:'Pendiente de lectura'});
+  $('bNext').disabled = true; this.updateProg();
+ }
+ lock(m){ $('txt').innerText = m; $('txt').classList.add('text-gray-400'); }
+ reveal(t){ $('txt').innerText = t; $('txt').classList.remove('text-gray-400'); }
+ jokerHalf(){
+  if (this.listening || this.j1) return;
+  this.j1 = true; $('bJ1').disabled = true; beep(800);
+  const w = this.text.split(/\s+/); const half = w.slice(0, Math.ceil(w.length/2)).join(' ') + ' …';
+  let s = 15; this.reveal(half); $('clock').innerText = 'Vista previa: ' + s + ' s';
+  const iv = setInterval(() => {
+   s--; if (this.listening) { clearInterval(iv); return; }
+   if (s <= 0) { clearInterval(iv); this.lock('🔒 El texto aparece cuando pulses «Iniciar lectura».'); $('clock').innerText = '00:00'; }
+   else $('clock').innerText = 'Vista previa: ' + s + ' s';
+  }, 1000);
+ }
+ jokerPremium(){
+  if (this.listening || this.j2) return;
+  this.j2 = true; beep(1000); this.show('sGame'); game.init();
+ }
+ victory(){
+  this.mode = 'basic'; this.text = BANK.basic[this.idx % BANK.basic.length];
+  this.show('sChal'); this.reset(); this.j2 = true; $('bJ2').disabled = true;
+  this.msg('¡Reto superado! Tu texto simplificado está listo. Pulsa «Iniciar lectura».', true);
+ }
+ retry(){
+  this.prev = this.last; this.mode = 'retry'; this.text = BANK.retry[this.idx % BANK.retry.length];
+  this.reset(); this.j1 = this.j2 = true; $('bJ1').disabled = $('bJ2').disabled = true;
+  $('cmpA').innerText = `Puntaje: ${this.prev.global} | PPM: ${this.prev.ppm}`;
+ }
+ next(){ this.load(this.idx + 1); }
+ toggle(){ this.listening ? this.stop() : this.begin(); }
+ begin(){
+  this.msg('');
+  if (this.noSR) { this.msg('Tu navegador no admite reconocimiento de voz. Usa Google Chrome o Edge.'); return; }
+  if (this.listening) return;
+  this.final = ''; this.interim = ''; this.rms = []; this.evaluated = false; this.finishing = false; this.meterOn = false; this.listening = true;
+  $('nullMsg').classList.add('hidden'); $('trans').innerText = 'Escuchando...';
+  this.reveal(this.text);                             /* el texto aparece aquí, junto con el cronómetro */
+  $('bMic').innerText = '⏹ Terminar lectura'; $('bJ1').disabled = $('bJ2').disabled = true;
+  try { this.rec.start(); } catch(e){}                /* arranca dentro del clic, sin esperas */
+  this.t0 = Date.now();
+  this.tick = setInterval(() => $('clock').innerText = fmt((Date.now()-this.t0)/1000), 250);   /* cronómetro sin límite */
+  this.startMeter();
+ }
+ async startMeter(){
+  if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) return;   /* en celulares el medidor compite con el reconocimiento de voz */
+  try {
+   const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+   if (!this.listening) { stream.getTracks().forEach(t => t.stop()); return; }
+   this.stream = stream;
+   this.actx = new (window.AudioContext || window.webkitAudioContext)();
+   const an = this.actx.createAnalyser(); an.fftSize = 1024;
+   this.actx.createMediaStreamSource(stream).connect(an);
+   const buf = new Float32Array(an.fftSize);
+   this.meter = setInterval(() => { an.getFloatTimeDomainData(buf); let s = 0; for (const v of buf) s += v*v; this.rms.push(Math.sqrt(s/buf.length)); }, 50);
+   this.meterOn = true;
+  } catch(e){ this.msg('No se pudo medir el volumen; volumen y entonación no se calificarán en este intento.'); }
+ }
+ stop(abort){
+  if (!this.listening) return;
+  this.secs = Math.max(1, (Date.now() - this.t0) / 1000);
+  this.listening = false; this.finishing = true;
+  clearInterval(this.tick); clearInterval(this.meter);
+  if (this.stream) this.stream.getTracks().forEach(t => t.stop());
+  if (this.actx) this.actx.close();
+  this.stream = null; this.actx = null;
+  if (abort) { this.finishing = false; this.evaluated = true; try { this.rec.stop(); } catch(e){} $('bMic').innerText = '🎤 Iniciar lectura'; this.lock('🔒 El texto aparece cuando pulses «Iniciar lectura».'); $('clock').innerText = '00:00'; return; }
+  $('bMic').disabled = true;
+  try { this.rec.stop(); } catch(e){ this.evaluate(); }
+  setTimeout(() => this.evaluate(), 2500);            /* respaldo si onend no llega */
+ }
+ evaluate(){
+  if (this.evaluated) return; this.evaluated = true; this.finishing = false;
+  const spoken = words(this.final + ' ' + this.interim), target = words(this.text);
+  const voiced = this.rms.filter(v => v > 0.015);
+  const mute = !spoken.length || (this.meterOn && voiced.length < 5);
+  if (mute) {
+   $('nullMsg').classList.remove('hidden');
+   const z = {fluidez:0,rapidez:0,diccion:0,pronunciacion:0,volumen:0,entonacion:0,global:0,status:'Lectura nula o silencio detectado',ppm:0};
+   this.last = z; this.paint(z); this.after(z); return;
+  }
+  const hit = lcs(target, spoken);
+  const dicc = clamp(hit / target.length * 100);
+  const pron = clamp(hit / spoken.length * 100);
+  const ppm = Math.round(spoken.length / this.secs * 60);
+  const rap = clamp(ppm < 110 ? ppm/110*100 : ppm > 170 ? 100-(ppm-170) : 100);
+  let flu, vol = null, ent = null;
+  if (this.meterOn) {
+   const ratio = voiced.length / this.rms.length;     /* proporción del tiempo con voz: las pausas largas la bajan */
+   flu = clamp(Math.min(1, ratio/0.7)*100*0.6 + Math.min(1, spoken.length/target.length)*100*0.4);
+   const mean = voiced.reduce((a,b)=>a+b,0)/voiced.length;
+   vol = clamp(mean/0.08*100);
+   const sd = Math.sqrt(voiced.reduce((a,b)=>a+(b-mean)**2,0)/voiced.length);
+   ent = clamp((sd/mean)/0.6*100);
+  } else flu = clamp(Math.min(1, spoken.length/target.length)*100*Math.min(1, ppm/110));
+  const parts = [flu,rap,dicc,pron,vol,ent].filter(v => v !== null);
+  const global = clamp(parts.reduce((a,b)=>a+b,0)/parts.length);
+  const s = {fluidez:flu,rapidez:rap,diccion:dicc,pronunciacion:pron,volumen:vol,entonacion:ent,global,ppm,
+   status: global >= PASS ? '¡Desafío superado!' : 'Necesita mejorar (mínimo ' + PASS + ')'};
+  this.last = s; this.paint(s);
+  if (this.mode === 'retry') $('cmpB').innerText = `Puntaje: ${global} | PPM: ${ppm}`;
+  this.after(s);
+ }
+ after(s){
+  const snip = BANK.main[this.idx % BANK.main.length].slice(0,45) + '...';
+  const e = this.done.find(d => d.idx === this.idx);
+  if (s.global >= PASS) { if (!e) this.done.push({idx:this.idx, score:s.global, snip}); else e.score = Math.max(e.score, s.global); this.save(); this.updateProg(); }
+  if (s.global < PASS && this.mode === 'main') $('bRetry').classList.remove('hidden');
+  $('bMic').disabled = false; $('bMic').innerText = '🎤 Leer de nuevo';
+  $('bNext').disabled = false;
+ }
+ paint(s){
+  IND.forEach(([k]) => { $('v-'+k).innerText = s[k] == null ? 'N/D' : s[k] + ' pts'; $('b-'+k).style.width = (s[k] || 0) + '%'; });
+  $('gScore').innerText = s.global + ' / 100'; $('gStat').innerText = s.status;
+ }
+ updateProg(){ $('prog').innerText = Math.min(this.done.length, NEED) + ' / ' + NEED; $('lockProg').innerText = this.done.length + ' / ' + NEED + ' completados'; }
+ showDiploma(){
+  this.show('sCert'); this.updateProg();
+  const ok = this.done.length >= NEED; $('locked').classList.toggle('hidden', ok); $('unlocked').classList.toggle('hidden', !ok);
+  if (!ok) return;
+  const d = this.done.slice(0, NEED), avg = Math.round(d.reduce((a,c)=>a+c.score,0)/d.length);
+  $('cName').innerText = this.st.name.toUpperCase(); $('cDet').innerText = `Carrera: ${this.st.career} | Grupo: ${this.st.group}`;
+  $('cAvg').innerText = avg; $('folio').innerText = 'GAL-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random()*9000);
+  $('cDate').innerText = 'Fecha de emisión: ' + new Date().toLocaleDateString('es-MX');
+  $('cList').innerHTML = d.map((c,i) => `<div class="flex justify-between border-b py-1"><span>Desafío ${i+1}: ${c.snip}</span><b>${c.score} pts</b></div>`).join('');
+ }
+}
+
+const DIF = {hp1:600, hp2:280, rate1:16, rate2:32, dmg:3};   /* vida de los enemigos, cadencia de disparo (menos = más disparos) y daño por impacto */
+class Game {
+ constructor(){ this.keys = {}; this.dir = 0; this.run = false; }
+ init(){
+  this.cv = $('space'); this.c = this.cv.getContext('2d');
+  window.onkeydown = e => { this.keys[e.code] = true; if (e.code.startsWith('Arrow')) e.preventDefault(); };
+  window.onkeyup = e => this.keys[e.code] = false;
+  $('ovT').innerText = '¡Prepárate para el duelo!'; $('ovT').className = 'text-2xl font-black text-yellow-400 mb-2';
+  $('ovD').innerText = 'Cazas TIE blindados detectados: resisten mucho y disparan sin parar. Esquiva y destrúyelos para desbloquear tu texto simplificado.';
+  $('ovB').innerText = '¡Iniciar combate!'; $('ovB').classList.remove('hidden'); $('ov').classList.remove('hidden');
+ }
+ start(){
+  $('ov').classList.add('hidden');
+  const W = this.cv.width;
+  this.p = {x:W/2-22, y:385, w:45, h:45, hp:100}; this.pl = []; this.el = []; this.fx = []; this.cool = 0; this.fr = 0;
+  const epic = app.idx % 2 === 1;
+  const mk = (x,y,vx,hp,t,rate) => ({x,y,by:y,w:64,h:56,hp,max:hp,vx,t,rate,n:0});
+  this.en = epic ? [mk(W/3,40,6,DIF.hp2,0,DIF.rate2), mk(2*W/3,95,-6,DIF.hp2,8,DIF.rate2)] : [mk(W/2-32,50,5,DIF.hp1,0,DIF.rate1)];
+  this.epic = epic; this.run = true; this.loop();
+ }
+ loop(){ if (!this.run) return; this.update(); this.draw(); requestAnimationFrame(() => this.loop()); }
+ fire(e){
+  const cx = e.x+e.w/2, cy = e.y+e.h, p = this.p;
+  [-2.2,0,2.2].forEach(v => this.el.push({x:cx,y:cy,vx:v,vy:6.5}));                                   /* abanico de tres disparos */
+  if (++e.n % 3 === 0) this.el.push({x:cx,y:cy,vx:Math.max(-3.5,Math.min(3.5,(p.x+p.w/2-cx)/38)),vy:8});   /* disparo dirigido al jugador */
+  if (e.hp < e.max*.5) this.el.push({x:e.x+6,y:cy,vx:-3.5,vy:5.5},{x:e.x+e.w-6,y:cy,vx:3.5,vy:5.5});      /* furia: con menos de la mitad de vida dispara más */
+  if (e.n % 3 === 0) beep(180,.04);
+ }
+ update(){
+  const W = this.cv.width, p = this.p; this.fr++;
+  const d = (this.keys.ArrowRight||this.keys.KeyD ? 1 : 0) - (this.keys.ArrowLeft||this.keys.KeyA ? 1 : 0) + this.dir;
+  p.x = Math.max(10, Math.min(W-p.w-10, p.x + Math.sign(d)*7));
+  if (--this.cool <= 0) { this.cool = 14; this.pl.push({x:p.x+8,y:p.y},{x:p.x+p.w-8,y:p.y}); }   /* disparo automático */
+  for (let i = this.pl.length-1; i >= 0; i--) { this.pl[i].y -= 10; if (this.pl[i].y < 0) this.pl.splice(i,1); }
+  this.en.forEach((e,k) => { if (e.hp <= 0) return;
+   e.x += e.vx; if (e.x < 20 || e.x > W-e.w-20) e.vx *= -1;
+   e.y = e.by + Math.sin(this.fr/22 + k*2)*22;
+   if (++e.t > (e.hp < e.max*.5 ? e.rate*.6 : e.rate)) { e.t = 0; this.fire(e); }
+   for (let i = this.pl.length-1; i >= 0; i--) { const l = this.pl[i];
+    if (l.x>e.x && l.x<e.x+e.w && l.y>e.y && l.y<e.y+e.h) { e.hp -= 15; this.pl.splice(i,1); this.boom(l.x,l.y,'#FFCC00'); } }
+  });
+  for (let i = this.el.length-1; i >= 0; i--) { const l = this.el[i]; l.y += l.vy; l.x += l.vx;
+   if (l.x>p.x && l.x<p.x+p.w && l.y>p.y && l.y<p.y+p.h) { p.hp -= DIF.dmg; this.el.splice(i,1); beep(150,.1); this.boom(l.x,l.y,'#FF3333');
+    if (p.hp <= 0) return this.end(false); }
+   else if (l.y > this.cv.height || l.x < 0 || l.x > W) this.el.splice(i,1); }
+  for (let i = this.fx.length-1; i >= 0; i--) { const f = this.fx[i]; f.x += f.vx; f.y += f.vy; if (--f.life <= 0) this.fx.splice(i,1); }
+  $('hp').innerText = 'Vida: ' + Math.max(0, p.hp) + '%';
+  if (this.en.every(e => e.hp <= 0)) this.end(true);
+ }
+ boom(x,y,color){ for (let i=0;i<5;i++) this.fx.push({x,y,vx:(Math.random()-.5)*6,vy:(Math.random()-.5)*6,life:18,color}); }
+ xwing(p){
+  const c = this.c; c.save(); c.translate(p.x+p.w/2, p.y+p.h/2); c.scale(.92,.92);
+  for (const sx of [-1,1]) for (const sy of [-1,1]) {
+   c.strokeStyle = '#CBD5E1'; c.lineWidth = 6; c.beginPath(); c.moveTo(sx*4,sy*3); c.lineTo(sx*25,sy*16); c.stroke();   /* ala en X */
+   c.strokeStyle = '#94A3B8'; c.lineWidth = 2; c.beginPath(); c.moveTo(sx*25,sy*16); c.lineTo(sx*25,sy*16-16); c.stroke(); /* cañón */
+   c.fillStyle = '#EF4444'; c.fillRect(sx*25-1.5, sy*16-19, 3, 3);
+   c.fillStyle = '#475569'; c.fillRect(sx*14-3, sy*9-1, 6, 12);                                                           /* motor */
+  }
+  c.shadowBlur = 12; c.shadowColor = '#00E5FF'; c.fillStyle = '#67E8F9';
+  for (const sx of [-1,1]) c.fillRect(sx*14-2, 21, 4, 5 + Math.random()*5);                                              /* llamas */
+  c.shadowBlur = 0; c.fillStyle = '#F1F5F9'; c.strokeStyle = '#64748B'; c.lineWidth = 1.5;
+  c.beginPath(); c.moveTo(0,-28); c.lineTo(5,-10); c.lineTo(5,19); c.lineTo(-5,19); c.lineTo(-5,-10); c.closePath(); c.fill(); c.stroke();
+  c.fillStyle = '#F57C00'; c.fillRect(-5,7,10,3);
+  c.fillStyle = '#38BDF8'; c.beginPath(); c.ellipse(0,-6,3.5,8,0,0,7); c.fill();
+  c.restore();
+ }
+ tie(e){
+  const c = this.c; c.save(); c.translate(e.x+e.w/2, e.y+e.h/2); const k = e.w/74; c.scale(k,k);
+  c.strokeStyle = '#64748B'; c.lineWidth = 5; c.beginPath(); c.moveTo(-16,0); c.lineTo(16,0); c.stroke();                  /* soporte */
+  const hex = [[-5,-21],[5,-21],[11,0],[5,21],[-5,21],[-11,0]];
+  for (const sx of [-1,1]) { c.save(); c.translate(sx*26,0);
+   c.fillStyle = '#1F2937'; c.strokeStyle = '#94A3B8'; c.lineWidth = 2;
+   c.beginPath(); hex.forEach(([x,y],i) => i ? c.lineTo(x,y) : c.moveTo(x,y)); c.closePath(); c.fill(); c.stroke();      /* panel hexagonal */
+   c.strokeStyle = '#475569'; c.lineWidth = 1; hex.forEach(([x,y]) => { c.beginPath(); c.moveTo(0,0); c.lineTo(x,y); c.stroke(); });
+   c.restore(); }
+  c.fillStyle = '#334155'; c.strokeStyle = '#94A3B8'; c.lineWidth = 2; c.beginPath(); c.arc(0,0,11,0,7); c.fill(); c.stroke();  /* cabina */
+  c.shadowBlur = 10; c.shadowColor = '#EF4444'; c.fillStyle = '#B91C1C'; c.beginPath(); c.arc(0,0,5.5,0,7); c.fill(); c.shadowBlur = 0;
+  c.strokeStyle = '#1F2937'; c.lineWidth = 1; c.beginPath(); c.moveTo(-5.5,0); c.lineTo(5.5,0); c.moveTo(0,-5.5); c.lineTo(0,5.5); c.stroke();
+  c.fillStyle = '#94A3B8'; c.fillRect(-5,10,2,8); c.fillRect(3,10,2,8);                                                       /* cañones */
+  c.restore();
+ }
+ draw(){
+  const c = this.c, W = this.cv.width, H = this.cv.height;
+  c.fillStyle = '#090D14'; c.fillRect(0,0,W,H); c.fillStyle = '#fff';
+  for (let i=0;i<40;i++) c.fillRect((i*37)%W, (i*59 + Date.now()*.05)%H, i%2+1, i%2+1);
+  this.xwing(this.p);
+  for (const e of this.en) if (e.hp > 0) {
+   this.tie(e);
+   c.fillStyle = '#333'; c.fillRect(e.x,e.y-10,e.w,5); c.fillStyle = e.hp/e.max>.5 ? '#00FF66' : '#FF3333'; c.fillRect(e.x,e.y-10,e.w*e.hp/e.max,5);
+  }
+  c.lineWidth = 3; c.shadowBlur = 8; c.shadowColor = '#00FF66'; c.strokeStyle = '#00FF66';
+  this.pl.forEach(l => { c.beginPath(); c.moveTo(l.x,l.y); c.lineTo(l.x,l.y-12); c.stroke(); });
+  c.shadowColor = '#FF0033'; c.strokeStyle = '#FF3355';
+  this.el.forEach(l => { c.beginPath(); c.moveTo(l.x,l.y); c.lineTo(l.x+l.vx*2,l.y+11); c.stroke(); });
+  c.shadowBlur = 0;
+  this.fx.forEach(f => { c.fillStyle = f.color; c.fillRect(f.x,f.y,3,3); });
+ }
+ end(win){
+  this.run = false; $('ov').classList.remove('hidden');
+  $('ovT').innerText = win ? '¡Victoria galáctica!' : '¡Misión fallida!';
+  $('ovT').className = 'text-2xl font-black mb-2 ' + (win ? 'text-green-400' : 'text-red-500');
+  if (win) { $('ovD').innerText = 'Derrotaste a los cazas imperiales. Tu comodín premium se activó.'; $('ovB').classList.add('hidden'); setTimeout(() => app.victory(), 1800); }
+  else { $('ovD').innerText = 'Tu X-Wing recibió demasiado daño. Puedes reintentar el combate.'; $('ovB').innerText = 'Reintentar combate'; $('ovB').classList.remove('hidden'); }
+ }
+}
+const app = new App(), game = new Game();
+</script>
+</body>
+</html>
